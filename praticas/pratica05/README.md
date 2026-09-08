@@ -1,79 +1,67 @@
-# 💻 Prática 05: FlatList e App que Não Esquece
+# MetasSemestre
 
-Nesta prática o To-Do ganha lista eficiente e persistência local. **Ainda não** vamos extrair componentes — isso é a Prática 06.
+App de metas acadêmicas em React Native (Expo), com persistência local via
+AsyncStorage.
 
-## 🎯 Objetivos
+## Funcionalidades
 
-* Substituir `.map()` por `FlatList`.
-* Salvar e carregar tarefas com AsyncStorage + `useEffect`.
-* Validar que fechar e reabrir o app mantém os dados.
+- Cadastro de metas de estudo (texto + data de criação)
+- Remoção de metas
+- Marcar meta como concluída (desafio opcional) com contador
+  "X pendentes / Y concluídas" no cabeçalho
+- Persistência local: as metas continuam salvas mesmo depois de fechar o app
 
----
-
-## 📦 Fluxo Git
-
-1. Crie a Issue da **Prática 05**.
-2. Branch:
-
-```bash
-git checkout -b feature/pratica05
-```
-
-3. Trabalhe em `praticas/pratica05` (evolua a base da Prática 04).
+## Como rodar
 
 ```bash
 npm install
 npx expo start
 ```
 
----
+Escaneie o QR code com o app Expo Go (Android/iOS) ou rode em um emulador.
 
-## 🛠️ Parte A — FlatList
+## Estrutura
 
-1. Remova o `.map()` da lista.
-2. Importe `FlatList` de `react-native`.
-3. Configure:
+MetasSemestre/
+├── App.js
+├── components/
+│ ├── MetaInput.js (TextInput + Pressable de adicionar)
+│ └── MetaList.js (FlatList + item com Pressable de excluir/concluir)
+└── assets/
+├── icon.png
+├── adaptive-icon.png
+├── splash.png
+└── favicon.png
 
-* `data={tasks}`
-* `keyExtractor={(item) => item.id}`
-* `renderItem={...}` desenhando cada tarefa (card ainda pode ficar inline no `App`)
 
-4. Teste adicionando **muitas** tarefas (15+) e confirme a rolagem suave.
+> Os ícones em `assets/` são placeholders gerados automaticamente (fundo roxo
+> com "MS"). Troque por imagens suas quando for estilizar o app.
 
----
+## Onde estão os useEffect (persistência)
 
-## 🛠️ Parte B — AsyncStorage
+Os dois `useEffect` ficam em `App.js`:
 
-1. Pare o bundler (Ctrl+C) e instale:
+- **useEffect de carga** (linhas ~16–29): roda uma única vez, com array de
+  dependências vazio (`[]`), quando o componente `App` é montado. Ele busca
+  a chave `@metas_semestre` no `AsyncStorage`, faz `JSON.parse` do resultado
+  e popula o state `metas`. Ao final, marca `carregado = true`.
+- **useEffect de salvamento** (linhas ~32–41): tem `[metas, carregado]` como
+  dependências, então roda toda vez que a lista de metas muda. Ele só grava
+  no `AsyncStorage` depois que o carregamento inicial terminou (`carregado`
+  true), para não sobrescrever os dados salvos com uma lista vazia antes de
+  carregar. Usa `JSON.stringify` para salvar o array como string.
 
-```bash
-npx expo install @react-native-async-storage/async-storage
-```
+Ambos os efeitos têm `try/catch` com `Alert` amigável em caso de erro.
 
-2. Crie `saveTasks` (async): grave a lista com `setItem` + `JSON.stringify`.
-3. Chame `saveTasks` após adicionar e após deletar (com a lista já atualizada).
-4. Crie `loadTasks` (async): leia com `getItem`, faça `JSON.parse` se houver valor, e use `setTasks`.
-5. No `useEffect` com `[]`, chame `loadTasks()` na montagem.
+## Prints
 
-### Teste extremo
+1. **Lista vazia** — primeira abertura do app, sem metas cadastradas.
+   ![lista vazia](./prints/lista-vazia.png)
+2. **Com itens** — após cadastrar algumas metas.
+   ![com itens](./prints/com-itens.png)
+3. **Após reabrir o app** — mostrando que os dados persistiram.
+   ![apos reabrir](./prints/apos-reabrir.png)
 
-Adicione 3 tarefas → feche o app por completo (remover dos recentes) → abra de novo → as tarefas devem continuar lá.
+## Pull Request
 
----
-
-## ✅ Critérios de entrega
-
-* [ ] `FlatList` rolando com muitos itens
-* [ ] Persistência: fechar e reabrir mantém as tarefas
-* [ ] Add e delete continuam funcionando
-* [ ] Issue, branch `feature/pratica05`, commit, push e Pull Request
-
-### Commit sugerido
-
-```bash
-git add .
-git commit -m "Feat: Adiciona FlatList e AsyncStorage para persistir tarefas"
-git push origin feature/pratica05
-```
-
-Na **Aula 06**, vamos **organizar o código**: extrair o card da tarefa para um componente reutilizável com props.
+Link do PR: `https://github.com/Ericsondf/IESB-PDM-OESTE/pull/3`
