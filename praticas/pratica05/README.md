@@ -64,4 +64,4 @@ Ambos os efeitos têm `try/catch` com `Alert` amigável em caso de erro.
 
 ## Pull Request
 
-Link do PR: `<cole aqui o link do seu PR>`
+Link do PR: `https://github.com/Ericsondf/IESB-PDM-OESTE/pull/3`
