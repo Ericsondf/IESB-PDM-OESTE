@@ -1,117 +1,125 @@
-# 💻 Prática 06: Arrumando a Casa (Componentização)
+# RotinaIESB
 
-Nesta prática o app **não ganha funcionalidade nova** para o usuário final. O objetivo é melhorar a **qualidade do código**: extrair o visual da tarefa para um componente separado, deixando o `App` mais limpo.
+Atividade Integradora — Disciplina Programação para Dispositivos Móveis (React Native / Expo)
+Professor: Marcelo Alves Farias — IESB
+Aulas relacionadas: 02, 03, 04, 05 e 06
 
-## 🎯 Objetivos
+App organizador da rotina acadêmica: cadastro, listagem e remoção de
+compromissos (aula, estudo, trabalho, lazer), com persistência local via
+AsyncStorage.
 
-* Criar a estrutura `src/components`.
-* Extrair o card da tarefa para `TaskCard` com props.
-* Manter FlatList, add/delete e persistência funcionando (teste de regressão).
-
----
-
-## 📦 Fluxo Git
-
-1. Crie a Issue da **Prática 06**.
-2. Branch:
+## 1) Comando usado para criar o projeto
 
 ```bash
-git checkout -b feature/pratica06
+npx create-expo-app@latest RotinaIESB --template blank
+cd RotinaIESB
+npx expo install @react-native-async-storage/async-storage react-native-safe-area-context
 ```
 
-3. Trabalhe em `praticas/pratica06` (evolua a base da Prática 05).
+## 2) Como colocar no repositório IESB-PDM-OESTE e entregar
+
+Este projeto deve ficar em `praticas/pratica06` no repositório
+`Ericsondf/IESB-PDM-OESTE`. Passo a passo:
 
 ```bash
-npm install
+# 1. clonar seu repositório (se ainda não tiver localmente)
+git clone https://github.com/Ericsondf/IESB-PDM-OESTE.git
+cd IESB-PDM-OESTE
+
+# 2. criar a branch da atividade
+git checkout -b feature/atividade03
+
+# 3. copiar o conteúdo deste zip para dentro de praticas/pratica06
+#    (a pasta praticas/pratica06 já deve conter: App.js, labels.js,
+#    assets/, components/, package.json, app.json, README.md)
+
+# 4. instalar as dependências dentro da pasta da prática
+cd praticas/pratica06
+npx expo install
+# ou, se preferir garantir as libs específicas:
+npx expo install @react-native-async-storage/async-storage react-native-safe-area-context
+
+# 5. rodar e testar
 npx expo start
+
+# 6. voltar à raiz do repositório e enviar
+cd ../..
+git add praticas/pratica06
+git commit -m "Feat: Finaliza a implementacao da Pratica 06 (RotinaIESB)"
+git push origin feature/atividade03
 ```
 
----
+Depois, abra o Pull Request de `feature/atividade03` para `main` no
+GitHub e envie o link do PR na plataforma de ensino.
 
-## 🛠️ O que fazer
+## 2) Prints
 
-### 1. Estrutura de pastas
+> Substitua os placeholders abaixo pelas capturas de tela reais do app
+> rodando no emulador/Expo Go antes de entregar.
 
-Na raiz do projeto Expo, crie:
+- **Tela vazia** (sem compromissos cadastrados): `docs/print-vazia.png`
+- **Tela com itens** (compromissos cadastrados na lista): `docs/print-com-itens.png`
+- **Após reabrir o app** (mostrando que os dados persistiram): `docs/print-reabertura.png`
 
-```text
-src/components/
+## 3) Onde está o useEffect de carga e o de salvamento
+
+Ambos ficam em `App.js`:
+
+- **useEffect de CARGA** (linha ~34, roda apenas na montagem — array de
+  dependências `[]`): lê a chave `@rotina_iesb_compromissos` do
+  `AsyncStorage`, faz `JSON.parse` e preenche o estado `compromissos`.
+  Ao final, marca `setCarregado(true)`.
+
+- **useEffect de SALVAMENTO** (linha ~52, roda sempre que `compromissos`
+  ou `carregado` mudam): se `carregado` ainda for `false` ele não faz
+  nada (evita sobrescrever o storage com uma lista vazia antes da carga
+  terminar); caso contrário, salva a lista atual com
+  `AsyncStorage.setItem` usando `JSON.stringify`.
+
+## 4) Arquivos criados
+
+- `labels.js` — rótulos de texto exportados (título, placeholder, botão, etc.)
+- `components/CompromissoInput.js` — formulário (TextInput + Pressable de adicionar)
+- `components/CompromissoList.js` — lista de compromissos (FlatList + Pressable de remover)
+- `App.js` — tela principal, estado, useEffect e integração dos componentes
+
+## Estrutura do projeto
+
+```
+RotinaIESB/
+  App.js
+  labels.js
+  assets/
+    logo.png
+  components/
+    CompromissoInput.js
+    CompromissoList.js
+  package.json
+  app.json
+  README.md
 ```
 
-### 2. Criar `TaskCard`
+## Requisitos atendidos
 
-1. Crie `src/components/TaskCard.js` (ou `.jsx`).
-2. Recorte o JSX do card (a `View`, o `Text` e o `TouchableOpacity` do `X`) que está dentro do `renderItem` no `App`.
-3. Leve junto os estilos (`StyleSheet`) referentes ao card.
-4. Exporte o componente recebendo props `{ title, onDelete }`.
+- [x] Projeto Expo (template blank) com App.js, app.json, package.json e assets/
+- [x] labels.js com export nomeado, importado em App.js
+- [x] SafeAreaProvider + SafeAreaView (react-native-safe-area-context)
+- [x] Cabeçalho em linha (Image + Text)
+- [x] Formulário em linha (TextInput ~68% + Pressable com flex)
+- [x] Lista com flex: 1
+- [x] StyleSheet.create com width percentual, flex e justifyContent/alignItems
+- [x] useState para texto e lista de compromissos
+- [x] Objeto de compromisso `{ id, texto, criadoEm }` com id único (Date.now())
+- [x] Componentização: CompromissoInput e CompromissoList recebendo props
+- [x] FlatList com keyExtractor pelo id (nunca pelo index)
+- [x] Validação de texto vazio com Alert.alert
+- [x] Remoção com Pressable + filter por id
+- [x] android_ripple nos Pressable
+- [x] AsyncStorage com chave `@rotina_iesb_compromissos`
+- [x] useEffect de carga (montagem) e useEffect de salvamento (dependência da lista)
+- [x] try/catch com Alert amigável em caso de erro
 
-Exemplo de forma do filho:
+## Desafios opcionais (não implementados)
 
-```javascript
-export function TaskCard({ title, onDelete }) {
-  return (
-    <View style={styles.card}>
-      <Text style={styles.title}>{title}</Text>
-      <TouchableOpacity onPress={onDelete}>
-        <Text>X</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-```
-
-### 3. Usar no `App`
-
-```javascript
-import { TaskCard } from './src/components/TaskCard';
-
-// na FlatList:
-renderItem={({ item }) => (
-  <TaskCard
-    title={item.title}
-    onDelete={() => handleDelete(item.id)}
-  />
-)}
-```
-
-> Se na prática anterior o campo se chamava `task` em vez de `title`, padronize para `title` **ou** adapte o nome da prop — pai e filho precisam falar a mesma língua.
-
-### 4. O que NÃO precisa mudar
-
-* Lógica de `handleAdd` / `handleDelete`
-* AsyncStorage e `useEffect`
-* Estrutura da `FlatList` (`data`, `keyExtractor`)
-
-Só a **forma** de desenhar cada item muda.
-
----
-
-## 🧪 Teste de regressão
-
-No Expo Go, confirme que o app continua:
-
-1. Adicionando tarefas
-2. Removendo pelo `X`
-3. Rolando a lista
-4. Mantendo dados após fechar e reabrir o app
-
-Se algo parou, revise as props e o caminho do `import`.
-
----
-
-## ✅ Critérios de entrega
-
-* [ ] `TaskCard` em `src/components` com props `{ title, onDelete }`
-* [ ] `FlatList` usando o novo componente
-* [ ] Add, delete e persistência intactos
-* [ ] Issue, branch `feature/pratica06`, commit, push e Pull Request
-
-### Commit sugerido
-
-```bash
-git add .
-git commit -m "Refactor: Extrai interface da tarefa para componente TaskCard"
-git push origin feature/pratica06
-```
-
-Parabéns: ao final desta trilha você saiu do zero até um To-Do multiplataforma com persistência e código organizado em componentes.
+Nenhum desafio opcional (O1–O4) foi implementado nesta entrega — o app
+cobre apenas os requisitos obrigatórios (itens A a E do enunciado).
