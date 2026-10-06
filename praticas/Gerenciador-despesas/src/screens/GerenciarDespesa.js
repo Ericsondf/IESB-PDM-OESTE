@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, createElement } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,28 @@ import {
   Pressable,
   ScrollView,
   Alert,
+  Platform,
   StyleSheet,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { CATEGORIAS, DUMMY_DESPESAS } from '../data/despesas';
+
+// Converte Date para o formato yyyy-mm-dd usado pelo <input type="date"> (web)
+function dataParaInput(data) {
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  const dia = String(data.getDate()).padStart(2, '0');
+  return data.getFullYear() + '-' + mes + '-' + dia;
+}
+
+// Alert.alert não funciona no navegador, então usamos window.alert na web
+function mostrarMensagem(titulo, texto, aoConfirmar) {
+  if (Platform.OS === 'web') {
+    window.alert(titulo + '\n' + texto);
+    aoConfirmar();
+  } else {
+    Alert.alert(titulo, texto, [{ text: 'OK', onPress: aoConfirmar }]);
+  }
+}
 
 function GerenciarDespesa({ route, navigation }) {
   // Se vier um id pela navegação, a tela abre em modo de edição
@@ -74,10 +92,10 @@ function GerenciarDespesa({ route, navigation }) {
 
     console.log('Despesa pronta para ser salva:', despesa);
 
-    Alert.alert(
+    mostrarMensagem(
       despesaEditada ? 'Despesa atualizada' : 'Despesa cadastrada',
       despesa.descricao + ' - R$ ' + despesa.valor.toFixed(2) + ' (' + despesa.categoria + ')',
-      [{ text: 'OK', onPress: () => navigation.goBack() }]
+      () => navigation.goBack()
     );
   }
 
@@ -109,16 +127,38 @@ function GerenciarDespesa({ route, navigation }) {
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Data da Despesa</Text>
-        <Pressable onPress={() => setShowPicker(true)} style={styles.input}>
-          <Text>{data.toLocaleDateString('pt-BR')}</Text>
-        </Pressable>
-        {showPicker && (
-          <DateTimePicker
-            value={data}
-            mode="date"
-            display="default"
-            onChange={onChange}
-          />
+        {Platform.OS === 'web' ? (
+          // Na web o DateTimePicker nativo não existe: usa o seletor de data do navegador
+          createElement('input', {
+            type: 'date',
+            value: dataParaInput(data),
+            onChange: (event) => {
+              if (event.target.value) {
+                const [ano, mes, dia] = event.target.value.split('-').map(Number);
+                setData(new Date(ano, mes - 1, dia));
+              }
+            },
+            style: {
+              border: '1px solid #ccc',
+              padding: 8,
+              fontSize: 14,
+              backgroundColor: 'transparent',
+            },
+          })
+        ) : (
+          <>
+            <Pressable onPress={() => setShowPicker(true)} style={styles.input}>
+              <Text>{data.toLocaleDateString('pt-BR')}</Text>
+            </Pressable>
+            {showPicker && (
+              <DateTimePicker
+                value={data}
+                mode="date"
+                display="default"
+                onChange={onChange}
+              />
+            )}
+          </>
         )}
       </View>
 

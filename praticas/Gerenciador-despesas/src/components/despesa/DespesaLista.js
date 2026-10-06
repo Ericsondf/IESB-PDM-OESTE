@@ -5,7 +5,7 @@ function DespesaLista({ despesas }) {
   return (
     <FlatList
       data={despesas}
-      renderItem={DespesaItem}
+      renderItem={(itemData) => <DespesaItem item={itemData.item} />}
       keyExtractor={(item) => item.id}
       ListEmptyComponent={
         <Text style={styles.vazio}>Nenhuma despesa encontrada.</Text>
